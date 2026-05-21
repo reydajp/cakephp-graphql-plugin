@@ -1,0 +1,71 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: PHP ${{ matrix.php-version }} (${{ matrix.dependencies }})
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        php-version:
+          - '8.3'
+          - '8.4'
+          - '8.5'
+        dependencies:
+          - highest
+        include:
+          - php-version: '8.3'
+            dependencies: lowest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-version }}
+          extensions: intl, mbstring
+          coverage: none
+          tools: composer:v2
+
+      - name: Get Composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-php-${{ matrix.php-version }}-${{ matrix.dependencies }}-composer-${{ hashFiles('composer.json') }}
+          restore-keys: |
+            ${{ runner.os }}-php-${{ matrix.php-version }}-${{ matrix.dependencies }}-composer-
+            ${{ runner.os }}-php-${{ matrix.php-version }}-composer-
+
+      - name: Validate Composer metadata
+        run: composer validate --strict --no-check-lock
+
+      - name: Install dependencies
+        if: matrix.dependencies == 'highest'
+        run: composer install --prefer-dist --no-progress --no-interaction
+
+      - name: Install lowest supported dependencies
+        if: matrix.dependencies == 'lowest'
+        run: composer update --prefer-lowest --prefer-stable --prefer-dist --no-progress --no-interaction
+
+      - name: Check PHP syntax
+        run: find src tests -name '*.php' -exec php -l {} \;
+
+      - name: Run test suite
+        run: composer test

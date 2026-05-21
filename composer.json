@@ -1,0 +1,34 @@
+{
+    "name": "cake-graphql/cake-graphql",
+    "description": "CakePHP 5 plugin for GraphQL endpoint wiring, engine selection, and GraphQLite integration.",
+    "type": "cakephp-plugin",
+    "license": "MIT",
+    "require": {
+        "php": ">=8.3",
+        "cakephp/cakephp": "^5.0",
+        "thecodingmachine/graphqlite": "^8.3",
+        "webonyx/graphql-php": "^15.32"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^12.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "CakeGraphQL\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "CakeGraphQL\\Test\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "phpunit --colors=always"
+    },
+    "config": {
+        "allow-plugins": {
+            "cakephp/plugin-installer": true
+        },
+        "sort-packages": true
+    }
+}
