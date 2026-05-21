@@ -20,7 +20,9 @@ final class BakeGraphqlQueryCommand extends Command
         ?GraphqlQueryResolverGenerator $generator = null,
         ?GraphqlConfigUpdater $configUpdater = null,
     ) {
-        parent::__construct($factory);
+        if (method_exists(parent::class, '__construct')) {
+            parent::__construct($factory);
+        }
 
         $projectPath = (string)getcwd();
         $this->generator = $generator ?? new GraphqlQueryResolverGenerator($projectPath);
