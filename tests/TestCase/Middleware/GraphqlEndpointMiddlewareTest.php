@@ -57,6 +57,18 @@ final class GraphqlEndpointMiddlewareTest extends TestCase
         $this->assertSame(1, $engine->calls);
     }
 
+    public function testEngineMiddlewareIsCreatedOnce(): void
+    {
+        $engine = new RecordingEngine();
+        $middleware = $this->middleware($engine, authenticated: false);
+
+        $middleware->process(new ServerRequest(), $this->terminalHandler());
+        $middleware->process(new ServerRequest(), $this->terminalHandler());
+
+        $this->assertSame(1, $engine->middlewareCreations);
+        $this->assertSame(2, $engine->calls);
+    }
+
     private function middleware(RecordingEngine $engine, bool $authenticated): GraphqlEndpointMiddleware
     {
         $config = GraphqlConfig::fromArray([
@@ -88,9 +100,12 @@ final class GraphqlEndpointMiddlewareTest extends TestCase
 final class RecordingEngine implements GraphqlEngineInterface
 {
     public int $calls = 0;
+    public int $middlewareCreations = 0;
 
     public function createMiddleware(GraphqlEngineContext $context): MiddlewareInterface
     {
+        $this->middlewareCreations++;
+
         return new class ($this) implements MiddlewareInterface {
             public function __construct(private readonly RecordingEngine $engine)
             {

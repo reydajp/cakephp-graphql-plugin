@@ -61,8 +61,9 @@ final class BakeGraphqlQueryCommandTest extends TestCase
         $this->assertStringContainsString('final class UsersQuery', $contents);
         $this->assertStringContainsString('use LocatorAwareTrait;', $contents);
         $this->assertStringContainsString('#[Query]', $contents);
-        $this->assertStringContainsString('public function users(): array', $contents);
-        $this->assertStringContainsString("return \$this->fetchTable('Users')->find()->all()->toList();", $contents);
+        $this->assertStringContainsString('public function users(int $limit = 50): array', $contents);
+        $this->assertStringContainsString('$limit = max(1, min($limit, 100));', $contents);
+        $this->assertStringContainsString("return \$this->fetchTable('Users')->find()->limit(\$limit)->all()->toList();", $contents);
         $this->assertSame(['App\\Graphql\\UsersQuery'], $this->readGraphqliteQueries());
     }
 
@@ -156,6 +157,76 @@ final class BakeGraphqlQueryCommandTest extends TestCase
         $this->assertSame(['App\\Graphql\\UsersQuery'], $this->readGraphqliteQueries());
     }
 
+    public function testConfigUpdatePreservesDynamicConfigExpressions(): void
+    {
+        $this->writeConfigContents(<<<'PHP'
+<?php
+return [
+    'Security' => [
+        'salt' => env('SECURITY_SALT'),
+    ],
+    'Graphql' => [
+        'engines' => [
+            'Graphqlite' => [
+                'queries' => [
+                ],
+            ],
+        ],
+    ],
+];
+PHP);
+
+        (new GraphqlConfigUpdater($this->projectPath))->addGraphqliteQuery('App\\Graphql\\UsersQuery');
+
+        $contents = file_get_contents($this->projectPath . '/config/app_local.php');
+        $this->assertStringContainsString("'salt' => env('SECURITY_SALT')", $contents);
+        $this->assertStringContainsString("'App\\\\Graphql\\\\UsersQuery',", $contents);
+    }
+
+    public function testConfigUpdateDoesNotDuplicateClassConstantEntry(): void
+    {
+        $this->writeConfigContents(<<<'PHP'
+<?php
+return [
+    'Graphql' => [
+        'engines' => [
+            'Graphqlite' => [
+                'queries' => [
+                    App\Graphql\UsersQuery::class,
+                ],
+            ],
+        ],
+    ],
+];
+PHP);
+
+        (new GraphqlConfigUpdater($this->projectPath))->addGraphqliteQuery('App\\Graphql\\UsersQuery');
+
+        $contents = file_get_contents($this->projectPath . '/config/app_local.php');
+        $this->assertSame(1, substr_count($contents, 'UsersQuery'));
+    }
+
+    public function testConfigUpdateSupportsInlineEmptyQueriesArray(): void
+    {
+        $this->writeConfigContents(<<<'PHP'
+<?php
+return [
+    'Graphql' => [
+        'engines' => [
+            'Graphqlite' => [
+                'queries' => [],
+            ],
+        ],
+    ],
+];
+PHP);
+
+        (new GraphqlConfigUpdater($this->projectPath))->addGraphqliteQuery('App\\Graphql\\UsersQuery');
+
+        $config = require $this->projectPath . '/config/app_local.php';
+        $this->assertSame(['App\\Graphql\\UsersQuery'], $config['Graphql']['engines']['Graphqlite']['queries']);
+    }
+
     public function testCommandRollsBackGeneratedFileWhenConfigUpdateFails(): void
     {
         $exitCode = $this->runCommand(['Users']);
@@ -190,6 +261,13 @@ final class BakeGraphqlQueryCommandTest extends TestCase
             $directory . '/app_local.php',
             "<?php\nreturn " . var_export($config, true) . ";\n",
         );
+    }
+
+    private function writeConfigContents(string $contents): void
+    {
+        $directory = $this->projectPath . '/config';
+        mkdir($directory, 0777, true);
+        file_put_contents($directory . '/app_local.php', $contents);
     }
 
     /**

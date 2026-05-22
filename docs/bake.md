@@ -22,9 +22,11 @@ The generated method returns a list:
 
 ```php
 #[Query]
-public function users(): array
+public function users(int $limit = 50): array
 {
-    return $this->fetchTable('Users')->find()->all()->toList();
+    $limit = max(1, min($limit, 100));
+
+    return $this->fetchTable('Users')->find()->limit($limit)->all()->toList();
 }
 ```
 
@@ -65,6 +67,7 @@ Graphql.engines.Graphqlite.queries
 ```
 
 The updater looks for `config/app_local.php` first and then `config/app.php`. It avoids duplicate entries.
+It edits only the `Graphql.engines.Graphqlite.queries` array and does not evaluate or rewrite the whole config file.
 
 Use `--no-config` to generate the resolver without editing configuration:
 

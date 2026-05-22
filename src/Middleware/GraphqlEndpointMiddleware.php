@@ -13,6 +13,8 @@ use Psr\Http\Server\RequestHandlerInterface;
 
 final class GraphqlEndpointMiddleware implements MiddlewareInterface
 {
+    private ?MiddlewareInterface $engineMiddleware = null;
+
     public function __construct(
         private readonly GraphqlConfig $config,
         private readonly GraphqlEngineContext $context,
@@ -22,8 +24,9 @@ final class GraphqlEndpointMiddleware implements MiddlewareInterface
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        $engine = $this->registry->getForContext($this->context);
-        $engineMiddleware = $engine->createMiddleware($this->context);
+        $engineMiddleware = $this->engineMiddleware ??= $this->registry
+            ->getForContext($this->context)
+            ->createMiddleware($this->context);
         $authenticationMiddleware = new GraphqlAuthenticationMiddleware($this->config->authenticated());
 
         return $authenticationMiddleware->process(

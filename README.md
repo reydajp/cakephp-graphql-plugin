@@ -77,9 +77,11 @@ final class UsersQuery
     use LocatorAwareTrait;
 
     #[Query]
-    public function users(): array
+    public function users(int $limit = 50): array
     {
-        return $this->fetchTable('Users')->find()->all()->toList();
+        $limit = max(1, min($limit, 100));
+
+        return $this->fetchTable('Users')->find()->limit($limit)->all()->toList();
     }
 }
 ```

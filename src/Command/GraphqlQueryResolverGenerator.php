@@ -97,9 +97,10 @@ final class GraphqlQueryResolverGenerator
     private function collectionMethod(string $method, string $model): string
     {
         return "    #[Query]\n"
-            . '    public function ' . $method . "(): array\n"
+            . '    public function ' . $method . "(int \$limit = 50): array\n"
             . "    {\n"
-            . "        return \$this->fetchTable('" . $model . "')->find()->all()->toList();\n"
+            . "        \$limit = max(1, min(\$limit, 100));\n\n"
+            . "        return \$this->fetchTable('" . $model . "')->find()->limit(\$limit)->all()->toList();\n"
             . "    }\n";
     }
 
