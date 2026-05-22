@@ -125,12 +125,6 @@ When `authenticated` is `true`, CakeGraphQL rejects requests before GraphQL exec
 
 Field-level authorization is intentionally engine-specific. For GraphQLite, use GraphQLite attributes such as `#[Logged]`, `#[Right]`, or `#[Security]` inside application resolvers and types.
 
-## Architecture
-
-CakeGraphQL keeps CakePHP endpoint wiring separate from GraphQLite schema construction. The plugin validates configuration, registers a route-specific middleware, enforces optional endpoint authentication, and delegates execution to the selected engine adapter.
-
-See [docs/architecture.md](docs/architecture.md) for the component overview and decision records.
-
 ## Commands
 
 ```bash
