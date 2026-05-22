@@ -39,7 +39,7 @@ jobs:
         with:
           php-version: ${{ matrix.php-version }}
           extensions: intl, mbstring
-          coverage: none
+          coverage: ${{ matrix.php-version == '8.3' && matrix.dependencies == 'highest' && 'xdebug' || 'none' }}
           tools: composer:v2
 
       - name: Get Composer cache directory
@@ -72,5 +72,17 @@ jobs:
       - name: Check PHP syntax
         run: find src tests -name '*.php' -exec php -l {} \;
 
+      - name: Run test suite with coverage
+        if: matrix.php-version == '8.3' && matrix.dependencies == 'highest'
+        run: vendor/bin/phpunit --coverage-clover coverage.xml --colors=always
+
       - name: Run test suite
+        if: matrix.php-version != '8.3' || matrix.dependencies != 'highest'
         run: composer test
+
+      - name: Upload coverage reports to Codecov
+        if: matrix.php-version == '8.3' && matrix.dependencies == 'highest' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: coverage.xml
