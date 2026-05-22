@@ -18,7 +18,7 @@ final class GraphqlQueryResolverGenerator
         $className = $this->shortClassName($name);
         $path = $this->pathFor($namespace, $className);
 
-        if (file_exists($path)) {
+        if (is_file($path)) {
             throw new ConsoleException(sprintf('GraphQL query resolver already exists: %s', $path));
         }
 

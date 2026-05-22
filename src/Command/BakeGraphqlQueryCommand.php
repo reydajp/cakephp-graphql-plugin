@@ -72,7 +72,7 @@ final class BakeGraphqlQueryCommand extends Command
                 $this->configUpdater->addGraphqliteQuery($this->generator->className($name, $namespace));
             }
         } catch (ConsoleException $e) {
-            if (isset($path) && file_exists($path)) {
+            if (isset($path) && is_file($path)) {
                 unlink($path);
             }
             $io->err($e->getMessage());
