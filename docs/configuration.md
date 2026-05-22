@@ -52,7 +52,7 @@ Cake cache pool name used by GraphQLite. Defaults to `default`.
 
 `debug`
 
-When `true`, GraphQL error responses include debug details. Defaults to `false`.
+When `true`, GraphQL error responses include debug details. Defaults to `false`. Keep this disabled outside local development because debug responses can include internal exception details and traces.
 
 ## Request Flow
 

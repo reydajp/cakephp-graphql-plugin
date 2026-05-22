@@ -58,6 +58,8 @@ Generates:
 src/Api/Graphql/UsersQuery.php
 ```
 
+The `name` argument must contain only letters, numbers, and underscores, and start with a letter. Custom namespaces must be `App` or below `App` so generated files stay inside the application `src/` tree.
+
 ## Config Updates
 
 By default, the command adds the generated class to:

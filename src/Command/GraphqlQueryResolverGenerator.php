@@ -14,6 +14,8 @@ final readonly class GraphqlQueryResolverGenerator
 
     public function generate(string $name, string $namespace = 'App\\Graphql', bool $single = false): string
     {
+        $this->validateName($name);
+        $namespace = $this->normalizeNamespace($namespace);
         $model = Inflector::camelize($name);
         $className = $this->shortClassName($name);
         $path = $this->pathFor($namespace, $className);
@@ -37,7 +39,26 @@ final readonly class GraphqlQueryResolverGenerator
 
     public function className(string $name, string $namespace = 'App\\Graphql'): string
     {
-        return trim($namespace, '\\') . '\\' . $this->shortClassName($name);
+        $this->validateName($name);
+
+        return $this->normalizeNamespace($namespace) . '\\' . $this->shortClassName($name);
+    }
+
+    private function validateName(string $name): void
+    {
+        if (!preg_match('/^[A-Za-z][A-Za-z0-9_]*$/', $name)) {
+            throw new ConsoleException('GraphQL query name must contain only letters, numbers, and underscores, and start with a letter.');
+        }
+    }
+
+    private function normalizeNamespace(string $namespace): string
+    {
+        $namespace = trim($namespace, '\\');
+        if (!preg_match('/^App(?:\\\\[A-Za-z_][A-Za-z0-9_]*)*$/', $namespace)) {
+            throw new ConsoleException('GraphQL query namespace must be App or a valid namespace below App.');
+        }
+
+        return $namespace;
     }
 
     private function shortClassName(string $name): string

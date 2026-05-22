@@ -139,6 +139,23 @@ final class BakeGraphqlQueryCommandTest extends TestCase
         $this->assertFileDoesNotExist($this->projectPath . '/config/app_local.php');
     }
 
+    public function testCommandRejectsInvalidModelName(): void
+    {
+        $exitCode = $this->runCommand(['../Users', '--no-config']);
+
+        $this->assertSame(1, $exitCode);
+        $this->assertFileDoesNotExist($this->projectPath . '/src/UsersQuery.php');
+    }
+
+    public function testCommandRejectsNamespaceOutsideAppNamespace(): void
+    {
+        $exitCode = $this->runCommand(['Users', '--namespace', '..\\Outside', '--no-config']);
+
+        $this->assertSame(1, $exitCode);
+        $this->assertFileDoesNotExist($this->projectPath . '/Outside/UsersQuery.php');
+        $this->assertFileDoesNotExist($this->projectPath . '/src/../Outside/UsersQuery.php');
+    }
+
     public function testCommandDoesNotDuplicateConfigEntry(): void
     {
         $this->writeConfig([
