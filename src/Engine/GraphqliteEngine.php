@@ -13,7 +13,7 @@ use TheCodingMachine\GraphQLite\Http\Psr15GraphQLMiddlewareBuilder;
 use TheCodingMachine\GraphQLite\SchemaFactory;
 use Throwable;
 
-final class GraphqliteEngine implements GraphqlEngineInterface
+final readonly class GraphqliteEngine implements GraphqlEngineInterface
 {
     public function createMiddleware(GraphqlEngineContext $context): MiddlewareInterface
     {

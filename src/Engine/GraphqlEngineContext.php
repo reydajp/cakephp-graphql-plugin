@@ -6,7 +6,7 @@ namespace CakeGraphQL\Engine;
 use Cake\Core\ContainerInterface;
 use CakeGraphQL\Configuration\GraphqlConfig;
 
-final class GraphqlEngineContext
+final readonly class GraphqlEngineContext
 {
     public function __construct(
         private readonly ContainerInterface $container,

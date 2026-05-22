@@ -5,7 +5,7 @@ namespace CakeGraphQL\Command;
 
 use Cake\Console\Exception\ConsoleException;
 
-final class GraphqlConfigUpdater
+final readonly class GraphqlConfigUpdater
 {
     public function __construct(private readonly string $projectPath)
     {

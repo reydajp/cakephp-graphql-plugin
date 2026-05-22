@@ -5,7 +5,7 @@ namespace CakeGraphQL\Engine;
 
 use CakeGraphQL\Exception\GraphqlConfigurationException;
 
-final class GraphqlEngineRegistry
+final readonly class GraphqlEngineRegistry
 {
     /**
      * @param array<string, \CakeGraphQL\Engine\GraphqlEngineInterface> $engines

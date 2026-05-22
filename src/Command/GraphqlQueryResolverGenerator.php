@@ -6,7 +6,7 @@ namespace CakeGraphQL\Command;
 use Cake\Console\Exception\ConsoleException;
 use Cake\Utility\Inflector;
 
-final class GraphqlQueryResolverGenerator
+final readonly class GraphqlQueryResolverGenerator
 {
     public function __construct(private readonly string $projectPath)
     {
