@@ -9,7 +9,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 
-final class GraphqlAuthenticationMiddleware implements MiddlewareInterface
+final readonly class GraphqlAuthenticationMiddleware implements MiddlewareInterface
 {
     public function __construct(private readonly bool $authenticated)
     {

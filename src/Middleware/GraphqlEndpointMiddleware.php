@@ -31,7 +31,7 @@ final class GraphqlEndpointMiddleware implements MiddlewareInterface
 
         return $authenticationMiddleware->process(
             $request,
-            new class ($engineMiddleware, $handler) implements RequestHandlerInterface {
+            new readonly class ($engineMiddleware, $handler) implements RequestHandlerInterface {
                 public function __construct(
                     private readonly MiddlewareInterface $engineMiddleware,
                     private readonly RequestHandlerInterface $handler,
