@@ -6,6 +6,7 @@ namespace CakeGraphQL\Engine;
 use Cake\Cache\Cache;
 use CakeGraphQL\Exception\GraphqlConfigurationException;
 use GraphQL\Error\DebugFlag;
+use GraphQL\Validator\Rules\QueryDepth;
 use Psr\Http\Server\MiddlewareInterface;
 use TheCodingMachine\GraphQLite\Containers\BasicAutoWiringContainer;
 use TheCodingMachine\GraphQLite\Discovery\StaticClassFinder;
@@ -23,6 +24,8 @@ final readonly class GraphqliteEngine implements GraphqlEngineInterface
         $classes = array_values(array_unique([...$queries, ...$types]));
         $cacheName = $this->cacheName($config);
         $debug = $this->debug($config);
+        $maxDepth = $this->optionalNonNegativeInt($config, 'maxDepth');
+        $maxComplexity = $this->optionalNonNegativeInt($config, 'maxComplexity');
 
         try {
             $container = new BasicAutoWiringContainer($context->container());
@@ -40,6 +43,12 @@ final readonly class GraphqliteEngine implements GraphqlEngineInterface
             $builder->getConfig()->setDebugFlag(
                 $debug ? DebugFlag::INCLUDE_DEBUG_MESSAGE | DebugFlag::INCLUDE_TRACE : DebugFlag::NONE,
             );
+            if ($maxDepth !== null) {
+                $builder->addValidationRule(new QueryDepth($maxDepth));
+            }
+            if ($maxComplexity !== null) {
+                $builder->limitQueryComplexity($maxComplexity);
+            }
 
             return $builder->createMiddleware();
         } catch (GraphqlConfigurationException $e) {
@@ -115,6 +124,25 @@ final readonly class GraphqliteEngine implements GraphqlEngineInterface
         }
 
         return $debug;
+    }
+
+    /**
+     * @param array<string, mixed> $config
+     */
+    private function optionalNonNegativeInt(array $config, string $key): ?int
+    {
+        if (!array_key_exists($key, $config)) {
+            return null;
+        }
+
+        $value = $config[$key];
+        if (!is_int($value) || $value < 0) {
+            throw new GraphqlConfigurationException(
+                sprintf('Graphql.engines.Graphqlite.%s must be a non-negative integer.', $key),
+            );
+        }
+
+        return $value;
     }
 
     /**

@@ -69,6 +69,90 @@ final class GraphqliteEngineTest extends TestCase
         $this->assertStringContainsString('Cannot query field "hidden"', $payload['errors'][0]['message']);
     }
 
+    public function testAppliesQueryComplexityLimit(): void
+    {
+        $middleware = (new GraphqliteEngine())->createMiddleware($this->context([
+            'queries' => [TestQuery::class],
+            'types' => [],
+            'cache' => 'cake_graphql_test',
+            'debug' => false,
+            'maxComplexity' => 1,
+        ]));
+
+        $response = $middleware->process($this->request('{ hello helloAgain: hello }'), $this->terminalHandler());
+        $payload = json_decode((string)$response->getBody(), true);
+
+        $this->assertSame(400, $response->getStatusCode());
+        $this->assertArrayHasKey('errors', $payload);
+        $this->assertStringContainsString('Max query complexity should be 1', $payload['errors'][0]['message']);
+    }
+
+    public function testDisabledQueryComplexityLimitAllowsQuery(): void
+    {
+        $middleware = (new GraphqliteEngine())->createMiddleware($this->context([
+            'queries' => [TestQuery::class],
+            'types' => [],
+            'cache' => 'cake_graphql_test',
+            'debug' => false,
+            'maxComplexity' => 0,
+        ]));
+
+        $response = $middleware->process($this->request('{ hello helloAgain: hello }'), $this->terminalHandler());
+        $payload = json_decode((string)$response->getBody(), true);
+
+        $this->assertSame(200, $response->getStatusCode());
+        $this->assertSame(['hello' => 'world', 'helloAgain' => 'world'], $payload['data']);
+    }
+
+    public function testAppliesQueryDepthLimit(): void
+    {
+        $middleware = (new GraphqliteEngine())->createMiddleware($this->context([
+            'queries' => [TestQuery::class],
+            'types' => [],
+            'cache' => 'cake_graphql_test',
+            'debug' => false,
+            'maxDepth' => 1,
+        ]));
+
+        $response = $middleware->process(
+            $this->request('{ __schema { queryType { fields { name } } } }'),
+            $this->terminalHandler(),
+        );
+        $payload = json_decode((string)$response->getBody(), true);
+
+        $this->assertSame(400, $response->getStatusCode());
+        $this->assertArrayHasKey('errors', $payload);
+        $this->assertStringContainsString('Max query depth should be 1', $payload['errors'][0]['message']);
+    }
+
+    public function testRejectsInvalidMaxDepth(): void
+    {
+        $this->expectException(GraphqlConfigurationException::class);
+        $this->expectExceptionMessage('Graphql.engines.Graphqlite.maxDepth must be a non-negative integer.');
+
+        (new GraphqliteEngine())->createMiddleware($this->context([
+            'queries' => [TestQuery::class],
+            'types' => [],
+            'cache' => 'cake_graphql_test',
+            'debug' => false,
+            'maxDepth' => -1,
+        ]));
+    }
+
+    public function testRejectsInvalidMaxComplexity(): void
+    {
+        $this->expectException(GraphqlConfigurationException::class);
+        $this->expectExceptionMessage('Graphql.engines.Graphqlite.maxComplexity must be a non-negative integer.');
+
+        (new GraphqliteEngine())->createMiddleware($this->context([
+            'queries' => [TestQuery::class],
+            'types' => [],
+            'cache' => 'cake_graphql_test',
+            'debug' => false,
+            'maxComplexity' => '100',
+        ]));
+    }
+
     public function testRejectsMissingQueryClass(): void
     {
         $this->expectException(GraphqlConfigurationException::class);

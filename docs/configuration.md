@@ -13,6 +13,8 @@ CakeGraphQL reads a `Graphql` configuration key from CakePHP configuration.
             'types' => [],
             'cache' => 'default',
             'debug' => false,
+            'maxDepth' => 10,
+            'maxComplexity' => 200,
         ],
     ],
 ],
@@ -53,6 +55,14 @@ Cake cache pool name used by GraphQLite. Defaults to `default`.
 `debug`
 
 When `true`, GraphQL error responses include debug details. Defaults to `false`. Keep this disabled outside local development because debug responses can include internal exception details and traces.
+
+`maxDepth`
+
+Optional non-negative integer passed to Webonyx's query depth validator. Set a positive value to reject overly nested operations before resolver execution. Set `0` to disable the depth validator, or omit the key to leave the plugin's default validation rules unchanged.
+
+`maxComplexity`
+
+Optional non-negative integer passed to Webonyx's query complexity validator. Set a positive value to reject overly expensive operations before resolver execution. Set `0` to disable the complexity validator, or omit the key to leave the plugin's default validation rules unchanged.
 
 ## Request Flow
 

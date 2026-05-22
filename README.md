@@ -52,12 +52,14 @@ Configure the plugin with the `Graphql` key:
             ],
             'cache' => 'default',
             'debug' => false,
+            'maxDepth' => 10,
+            'maxComplexity' => 200,
         ],
     ],
 ],
 ```
 
-The plugin registers the configured route and attaches route-specific GraphQL middleware. CakePHP routing middleware must run as usual in the host application.
+The plugin registers the configured route and attaches route-specific GraphQL middleware. CakePHP routing middleware must run as usual in the host application. `maxDepth` and `maxComplexity` reject overly nested or expensive GraphQL operations before resolver execution.
 
 See [docs/configuration.md](docs/configuration.md) for the full configuration contract.
 
