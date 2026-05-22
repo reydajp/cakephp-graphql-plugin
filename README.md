@@ -1,3 +1,8 @@
+[![CI](https://github.com/reydajp/cakephp-graphql-plugin/actions/workflows/ci.yml/badge.svg?branch=dev)](https://github.com/reydajp/cakephp-graphql-plugin/actions/workflows/ci.yml?query=branch%3Adev)
+[![Coverage](https://codecov.io/gh/reydajp/cakephp-graphql-plugin/branch/dev/graph/badge.svg)](https://codecov.io/gh/reydajp/cakephp-graphql-plugin)
+[![PHP](https://img.shields.io/badge/PHP-%3E%3D8.3-777BB4.svg)](https://www.php.net/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 # CakeGraphQL
 
 CakeGraphQL is a CakePHP 5 plugin for GraphQL endpoint routing, endpoint-level authentication, engine selection, and GraphQLite integration.
