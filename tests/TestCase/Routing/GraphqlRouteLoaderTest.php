@@ -9,6 +9,7 @@ use Cake\Routing\Exception\MissingRouteException;
 use Cake\Routing\RouteBuilder;
 use Cake\Routing\RouteCollection;
 use CakeGraphQL\Configuration\GraphqlConfig;
+use CakeGraphQL\Controller\GraphqlController;
 use CakeGraphQL\Exception\GraphqlConfigurationException;
 use CakeGraphQL\Middleware\GraphqlEndpointMiddleware;
 use CakeGraphQL\CakeGraphQLPlugin;
@@ -47,6 +48,7 @@ final class GraphqlRouteLoaderTest extends TestCase
         $this->assertSame('Graphql', $params['controller']);
         $this->assertSame('execute', $params['action']);
         $this->assertSame([GraphqlEndpointMiddleware::class], $collection->getMiddleware($params['_middleware']));
+        $this->assertTrue(class_exists(GraphqlController::class));
     }
 
     public function testDoesNotRegisterUnconfiguredEndpointRoute(): void
