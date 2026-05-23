@@ -95,6 +95,8 @@ final class UsersQuery
 
 Register resolver classes explicitly in `Graphql.engines.Graphqlite.queries`. CakeGraphQL does not scan broad application namespaces by default.
 
+See [docs/graphqlite.md](docs/graphqlite.md) for CakePHP examples using GraphQLite `#[Query]`, `#[Type]`, and `#[Field]` attributes.
+
 ## Bake Command
 
 Generate a collection query resolver:
@@ -123,7 +125,9 @@ See [docs/bake.md](docs/bake.md) for details.
 
 When `authenticated` is `true`, CakeGraphQL rejects requests before GraphQL execution if the request has no `identity` attribute. This relies on the host application's Cake Authentication middleware running before the GraphQL route middleware.
 
-Field-level authorization is intentionally engine-specific. For GraphQLite, use GraphQLite attributes such as `#[Logged]`, `#[Right]`, or `#[Security]` inside application resolvers and types.
+Field-level authorization is intentionally engine-specific. GraphQLite attributes such as `#[Logged]`, `#[Right]`, or `#[Security]` require GraphQLite authentication and authorization services; CakeGraphQL does not currently bridge Cake Authentication or Authorization into those services.
+
+See [docs/graphqlite.md](docs/graphqlite.md#security-attributes) for examples and the current integration boundary.
 
 ## Commands
 
