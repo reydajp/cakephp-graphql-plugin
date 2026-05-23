@@ -6,10 +6,10 @@ namespace CakeGraphQL\Test\TestCase\Command;
 use Cake\Console\CommandCollection;
 use Cake\Console\ConsoleIo;
 use Cake\Console\TestSuite\StubConsoleOutput;
+use CakeGraphQL\CakeGraphQLPlugin;
 use CakeGraphQL\Command\BakeGraphqlQueryCommand;
 use CakeGraphQL\Command\GraphqlConfigUpdater;
 use CakeGraphQL\Command\GraphqlQueryResolverGenerator;
-use CakeGraphQL\Plugin;
 use PHPUnit\Framework\TestCase;
 
 final class BakeGraphqlQueryCommandTest extends TestCase
@@ -33,7 +33,7 @@ final class BakeGraphqlQueryCommandTest extends TestCase
 
     public function testPluginRegistersBakeGraphqlQueryCommand(): void
     {
-        $commands = (new Plugin())->console(new CommandCollection());
+        $commands = (new CakeGraphQLPlugin())->console(new CommandCollection());
 
         $this->assertTrue($commands->has('bake graphql query'));
         $this->assertSame(BakeGraphqlQueryCommand::class, $commands->get('bake graphql query'));

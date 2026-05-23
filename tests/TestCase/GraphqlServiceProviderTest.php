@@ -12,7 +12,7 @@ use CakeGraphQL\Engine\GraphqlEngineRegistry;
 use CakeGraphQL\Engine\GraphqliteEngine;
 use CakeGraphQL\GraphqlServiceProvider;
 use CakeGraphQL\Middleware\GraphqlEndpointMiddleware;
-use CakeGraphQL\Plugin;
+use CakeGraphQL\CakeGraphQLPlugin;
 use Laminas\Diactoros\Response;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
@@ -62,7 +62,7 @@ final class GraphqlServiceProviderTest extends TestCase
         ]);
         $container = new Container();
 
-        (new Plugin())->services($container);
+        (new CakeGraphQLPlugin())->services($container);
 
         $this->assertInstanceOf(GraphqlConfig::class, $container->get(GraphqlConfig::class));
         $this->assertInstanceOf(GraphqlEndpointMiddleware::class, $container->get(GraphqlEndpointMiddleware::class));

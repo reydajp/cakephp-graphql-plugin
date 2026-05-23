@@ -11,7 +11,7 @@ use Cake\Routing\RouteCollection;
 use CakeGraphQL\Configuration\GraphqlConfig;
 use CakeGraphQL\Exception\GraphqlConfigurationException;
 use CakeGraphQL\Middleware\GraphqlEndpointMiddleware;
-use CakeGraphQL\Plugin;
+use CakeGraphQL\CakeGraphQLPlugin;
 use CakeGraphQL\Routing\GraphqlRouteLoader;
 use PHPUnit\Framework\TestCase;
 
@@ -83,7 +83,7 @@ final class GraphqlRouteLoaderTest extends TestCase
         $collection = new RouteCollection();
         $routes = new RouteBuilder($collection, '/');
 
-        (new Plugin())->routes($routes);
+        (new CakeGraphQLPlugin())->routes($routes);
 
         $params = $collection->parseRequest(new ServerRequest([
             'url' => '/api/graphql',
@@ -107,6 +107,6 @@ final class GraphqlRouteLoaderTest extends TestCase
         $this->expectException(GraphqlConfigurationException::class);
         $this->expectExceptionMessage('Graphql.path must be a non-empty string.');
 
-        (new Plugin())->routes(new RouteBuilder(new RouteCollection(), '/'));
+        (new CakeGraphQLPlugin())->routes(new RouteBuilder(new RouteCollection(), '/'));
     }
 }

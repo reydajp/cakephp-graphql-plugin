@@ -4,15 +4,15 @@ declare(strict_types=1);
 namespace CakeGraphQL;
 
 use Cake\Console\CommandCollection;
-use Cake\Core\Configure;
 use Cake\Core\BasePlugin;
+use Cake\Core\Configure;
 use Cake\Core\ContainerInterface;
-use CakeGraphQL\Command\BakeGraphqlQueryCommand;
 use Cake\Routing\RouteBuilder;
+use CakeGraphQL\Command\BakeGraphqlQueryCommand;
 use CakeGraphQL\Configuration\GraphqlConfig;
 use CakeGraphQL\Routing\GraphqlRouteLoader;
 
-final class Plugin extends BasePlugin
+final class CakeGraphQLPlugin extends BasePlugin
 {
     public function routes(RouteBuilder $routes): void
     {
