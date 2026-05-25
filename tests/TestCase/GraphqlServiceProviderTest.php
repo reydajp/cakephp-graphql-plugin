@@ -12,6 +12,7 @@ use CakeGraphQL\Engine\GraphqlEngineRegistry;
 use CakeGraphQL\Engine\GraphqliteEngine;
 use CakeGraphQL\GraphqlServiceProvider;
 use CakeGraphQL\Middleware\GraphqlEndpointMiddleware;
+use CakeGraphQL\Security\CakeAuthenticationService;
 use CakeGraphQL\CakeGraphQLPlugin;
 use Laminas\Diactoros\Response;
 use PHPUnit\Framework\TestCase;
@@ -48,6 +49,11 @@ final class GraphqlServiceProviderTest extends TestCase
         $this->assertInstanceOf(GraphqlEngineContext::class, $container->get(GraphqlEngineContext::class));
         $this->assertInstanceOf(GraphqlEngineRegistry::class, $container->get(GraphqlEngineRegistry::class));
         $this->assertInstanceOf(GraphqlEndpointMiddleware::class, $container->get(GraphqlEndpointMiddleware::class));
+        $this->assertInstanceOf(CakeAuthenticationService::class, $container->get(CakeAuthenticationService::class));
+        $this->assertSame(
+            $container->get(CakeAuthenticationService::class),
+            $container->get(CakeAuthenticationService::class),
+        );
     }
 
     public function testPluginRegistersRuntimeServices(): void

@@ -12,6 +12,7 @@ use CakeGraphQL\Engine\GraphqlEngineInterface;
 use CakeGraphQL\Engine\GraphqlEngineRegistry;
 use CakeGraphQL\Engine\GraphqliteEngine;
 use CakeGraphQL\Middleware\GraphqlEndpointMiddleware;
+use CakeGraphQL\Security\CakeAuthenticationService;
 
 final class GraphqlServiceProvider extends ServiceProvider
 {
@@ -20,6 +21,7 @@ final class GraphqlServiceProvider extends ServiceProvider
         GraphqlEngineContext::class,
         GraphqlEngineRegistry::class,
         GraphqlEndpointMiddleware::class,
+        CakeAuthenticationService::class,
     ];
 
     /**
@@ -57,6 +59,8 @@ final class GraphqlServiceProvider extends ServiceProvider
         $container->addShared(GraphqlEngineContext::class, function () use ($container): GraphqlEngineContext {
             return new GraphqlEngineContext($container, $container->get(GraphqlConfig::class));
         });
+
+        $container->addShared(CakeAuthenticationService::class);
 
         $container->addShared(GraphqlEndpointMiddleware::class, function () use ($container): GraphqlEndpointMiddleware {
             return new GraphqlEndpointMiddleware(
