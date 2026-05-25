@@ -13,6 +13,8 @@ use CakeGraphQL\Engine\GraphqliteEngine;
 use CakeGraphQL\Exception\GraphqlConfigurationException;
 use CakeGraphQL\Security\CakeAuthenticationService;
 use CakeGraphQL\Test\Fixture\Graphql\AuthenticatedQuery;
+use CakeGraphQL\Test\Fixture\Graphql\ErrorResponseQuery;
+use CakeGraphQL\Test\Fixture\Graphql\Product;
 use CakeGraphQL\Test\Fixture\Graphql\TestQuery;
 use Laminas\Diactoros\Response;
 use PHPUnit\Framework\TestCase;
@@ -101,6 +103,53 @@ final class GraphqliteEngineTest extends TestCase
 
         $this->assertArrayHasKey('errors', $payload);
         $this->assertStringContainsString('Cannot query field "hidden"', $payload['errors'][0]['message']);
+    }
+
+    public function testResolverHttpExceptionUsesGraphqlPartialErrorResponse(): void
+    {
+        $middleware = (new GraphqliteEngine())->createMiddleware($this->context([
+            'queries' => [ErrorResponseQuery::class],
+            'types' => [Product::class],
+            'cache' => 'cake_graphql_test',
+            'debug' => false,
+        ]));
+
+        $response = $middleware->process($this->request('{ user products { id } }'), $this->terminalHandler());
+        $payload = json_decode((string)$response->getBody(), true);
+
+        $this->assertSame(200, $response->getStatusCode());
+        $this->assertSame([
+            'user' => null,
+            'products' => [
+                ['id' => '1'],
+            ],
+        ], $payload['data']);
+        $this->assertSame('User not found', $payload['errors'][0]['message']);
+        $this->assertSame(['user'], $payload['errors'][0]['path']);
+    }
+
+    public function testResolverUnsafeExceptionStaysMaskedInNonDebugResponse(): void
+    {
+        $middleware = (new GraphqliteEngine())->createMiddleware($this->context([
+            'queries' => [ErrorResponseQuery::class],
+            'types' => [Product::class],
+            'cache' => 'cake_graphql_test',
+            'debug' => false,
+        ]));
+
+        $response = $middleware->process($this->request('{ unsafeError products { id } }'), $this->terminalHandler());
+        $payload = json_decode((string)$response->getBody(), true);
+
+        $this->assertSame(200, $response->getStatusCode());
+        $this->assertSame([
+            'unsafeError' => null,
+            'products' => [
+                ['id' => '1'],
+            ],
+        ], $payload['data']);
+        $this->assertSame('Internal server error', $payload['errors'][0]['message']);
+        $this->assertSame(['unsafeError'], $payload['errors'][0]['path']);
+        $this->assertArrayNotHasKey('extensions', $payload['errors'][0]);
     }
 
     public function testAppliesQueryComplexityLimit(): void

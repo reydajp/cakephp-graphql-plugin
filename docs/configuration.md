@@ -76,6 +76,35 @@ For authenticated endpoints, the intended host application flow is:
 6. The selected engine middleware executes the GraphQL operation.
 7. The engine returns the GraphQL JSON response.
 
+## Error Responses
+
+CakeGraphQL keeps transport-level authentication failures separate from GraphQL execution errors.
+
+When `authenticated` is `true` and no Cake `identity` attribute exists on the request, the endpoint rejects the request before GraphQL execution with HTTP `401`.
+
+Once GraphQL execution starts, resolver and field errors follow the common GraphQL partial-response pattern. Successfully resolved fields stay in `data`, failed nullable fields become `null`, and `errors` contains the field error with its `path`. Cake HTTP exceptions raised by resolvers expose their client-safe message while still returning HTTP `200` when partial data exists.
+
+Resolver-level authentication errors from GraphQLite attributes such as `#[Logged]` are execution errors, so they also return GraphQL error payloads with HTTP `200`.
+
+```json
+{
+  "data": {
+    "user": null,
+    "products": [
+      { "id": "1" }
+    ]
+  },
+  "errors": [
+    {
+      "message": "User not found",
+      "path": ["user"]
+    }
+  ]
+}
+```
+
+Unsafe exceptions remain masked as `Internal server error` when `debug` is `false`.
+
 ## Boundaries
 
 CakeGraphQL does not define application schema DSLs, business logic, field-level authorization rules, or authentication providers. Those stay in the host application and selected GraphQL engine.

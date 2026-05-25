@@ -4,6 +4,8 @@ declare(strict_types=1);
 namespace CakeGraphQL\Engine;
 
 use Cake\Cache\Cache;
+use CakeGraphQL\Error\GraphqlErrorFormatter;
+use CakeGraphQL\Error\GraphqlHttpCodeDecider;
 use CakeGraphQL\Exception\GraphqlConfigurationException;
 use CakeGraphQL\Security\CakeAuthenticationService;
 use GraphQL\Error\DebugFlag;
@@ -42,6 +44,8 @@ final readonly class GraphqliteEngine implements GraphqlEngineInterface
 
             $builder = new Psr15GraphQLMiddlewareBuilder($schemaFactory->createSchema());
             $builder->setUrl($context->path());
+            $builder->setHttpCodeDecider(new GraphqlHttpCodeDecider());
+            $builder->getConfig()->setErrorFormatter([GraphqlErrorFormatter::class, 'format']);
             $builder->getConfig()->setDebugFlag(
                 $debug ? DebugFlag::INCLUDE_DEBUG_MESSAGE | DebugFlag::INCLUDE_TRACE : DebugFlag::NONE,
             );

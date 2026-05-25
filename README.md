@@ -95,6 +95,12 @@ Register resolver classes explicitly in `Graphql.engines.Graphqlite.queries`. Ca
 
 See [docs/graphqlite.md](docs/graphqlite.md) for CakePHP examples using GraphQLite `#[Query]`, `#[Type]`, and `#[Field]` attributes.
 
+## Error Responses
+
+CakeGraphQL returns normal GraphQL partial responses for resolver and field errors after execution starts: HTTP `200`, partial `data`, and an `errors` entry with the field `path`. Cake HTTP exceptions thrown by resolvers expose their client-safe message, for example `User not found`.
+
+Endpoint-level authentication still happens before GraphQL execution. When `authenticated` is `true` and the request has no Cake `identity`, the endpoint returns HTTP `401`. Resolver-level authentication errors from GraphQLite attributes such as `#[Logged]` are GraphQL execution errors and return HTTP `200`.
+
 ## Bake Command
 
 Generate a collection query resolver:
