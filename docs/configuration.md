@@ -71,9 +71,10 @@ For authenticated endpoints, the intended host application flow is:
 1. Cake routing matches the configured GraphQL path.
 2. Body parsing runs.
 3. Cake Authentication attaches the request `identity`.
-4. CakeGraphQL rejects missing identity when `authenticated` is `true`.
-5. The selected engine middleware executes the GraphQL operation.
-6. The engine returns the GraphQL JSON response.
+4. CakeGraphQL copies the identity into its GraphQLite authentication bridge for resolver-level `#[Logged]` and `#[InjectUser]` support.
+5. CakeGraphQL rejects missing identity when `authenticated` is `true`.
+6. The selected engine middleware executes the GraphQL operation.
+7. The engine returns the GraphQL JSON response.
 
 ## Boundaries
 

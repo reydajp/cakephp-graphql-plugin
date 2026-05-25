@@ -1,5 +1,6 @@
 [![CI](https://github.com/reydajp/cakephp-graphql-plugin/actions/workflows/ci.yml/badge.svg?branch=dev)](https://github.com/reydajp/cakephp-graphql-plugin/actions/workflows/ci.yml?query=branch%3Adev)
 [![Coverage](https://codecov.io/gh/reydajp/cakephp-graphql-plugin/branch/dev/graph/badge.svg)](https://codecov.io/gh/reydajp/cakephp-graphql-plugin)
+[![Packagist](https://img.shields.io/packagist/v/reydajp/cake-graphql.svg)](https://packagist.org/packages/reydajp/cake-graphql)
 [![PHP](https://img.shields.io/badge/PHP-%3E%3D8.3-777BB4.svg)](https://www.php.net/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
@@ -145,7 +146,7 @@ The bridge reads Cake's request `identity` attribute. `AuthenticationComponent` 
 
 Field-level authorization is intentionally engine-specific. GraphQLite attributes such as `#[Right]` or `#[Security]` require GraphQLite authorization services; CakeGraphQL does not currently bridge Cake Authorization into those services.
 
-See [docs/graphqlite.md](docs/graphqlite.md#security-attributes) for examples and the current integration boundary.
+See [docs/graphqlite.md](docs/graphqlite.md#security-attributes) for examples and the current integration boundary. See [ADR-001](docs/decisions/001-bridge-cake-authentication-to-graphqlite.md) for the bridge design rationale.
 
 ## Commands
 
