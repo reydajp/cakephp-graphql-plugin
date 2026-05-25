@@ -67,6 +67,7 @@ final class GraphqlServiceProvider extends ServiceProvider
                 $container->get(GraphqlConfig::class),
                 $container->get(GraphqlEngineContext::class),
                 $container->get(GraphqlEngineRegistry::class),
+                $container->get(CakeAuthenticationService::class),
             );
         });
     }

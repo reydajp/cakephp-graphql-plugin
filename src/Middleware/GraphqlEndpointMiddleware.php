@@ -6,6 +6,7 @@ namespace CakeGraphQL\Middleware;
 use CakeGraphQL\Configuration\GraphqlConfig;
 use CakeGraphQL\Engine\GraphqlEngineContext;
 use CakeGraphQL\Engine\GraphqlEngineRegistry;
+use CakeGraphQL\Security\CakeAuthenticationService;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
@@ -19,6 +20,7 @@ final class GraphqlEndpointMiddleware implements MiddlewareInterface
         private readonly GraphqlConfig $config,
         private readonly GraphqlEngineContext $context,
         private readonly GraphqlEngineRegistry $registry,
+        private readonly CakeAuthenticationService $authenticationService,
     ) {
     }
 
@@ -29,20 +31,27 @@ final class GraphqlEndpointMiddleware implements MiddlewareInterface
             ->createMiddleware($this->context);
         $authenticationMiddleware = new GraphqlAuthenticationMiddleware($this->config->authenticated());
 
-        return $authenticationMiddleware->process(
-            $request,
-            new readonly class ($engineMiddleware, $handler) implements RequestHandlerInterface {
-                public function __construct(
-                    private readonly MiddlewareInterface $engineMiddleware,
-                    private readonly RequestHandlerInterface $handler,
-                ) {
-                }
+        $identity = $request->getAttribute('identity');
+        $this->authenticationService->setIdentity(is_object($identity) ? $identity : null);
 
-                public function handle(ServerRequestInterface $request): ResponseInterface
-                {
-                    return $this->engineMiddleware->process($request, $this->handler);
-                }
-            },
-        );
+        try {
+            return $authenticationMiddleware->process(
+                $request,
+                new readonly class ($engineMiddleware, $handler) implements RequestHandlerInterface {
+                    public function __construct(
+                        private readonly MiddlewareInterface $engineMiddleware,
+                        private readonly RequestHandlerInterface $handler,
+                    ) {
+                    }
+
+                    public function handle(ServerRequestInterface $request): ResponseInterface
+                    {
+                        return $this->engineMiddleware->process($request, $this->handler);
+                    }
+                },
+            );
+        } finally {
+            $this->authenticationService->clearIdentity();
+        }
     }
 }

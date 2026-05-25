@@ -11,6 +11,7 @@ use CakeGraphQL\Engine\GraphqlEngineContext;
 use CakeGraphQL\Engine\GraphqlEngineInterface;
 use CakeGraphQL\Engine\GraphqlEngineRegistry;
 use CakeGraphQL\Middleware\GraphqlEndpointMiddleware;
+use CakeGraphQL\Security\CakeAuthenticationService;
 use Laminas\Diactoros\Response;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
@@ -36,14 +37,18 @@ final class GraphqlEndpointMiddlewareTest extends TestCase
 
     public function testAuthenticatedRequestRunsSelectedEngineMiddleware(): void
     {
-        $engine = new RecordingEngine();
-        $middleware = $this->middleware($engine, authenticated: true);
-        $request = (new ServerRequest())->withAttribute('identity', new \stdClass());
+        $authenticationService = new CakeAuthenticationService();
+        $engine = new RecordingEngine($authenticationService);
+        $middleware = $this->middleware($engine, authenticated: true, authenticationService: $authenticationService);
+        $identity = new \stdClass();
+        $request = (new ServerRequest())->withAttribute('identity', $identity);
 
         $response = $middleware->process($request, $this->terminalHandler());
 
         $this->assertSame(211, $response->getStatusCode());
         $this->assertSame(1, $engine->calls);
+        $this->assertSame($identity, $engine->seenIdentity);
+        $this->assertNull($authenticationService->getIdentity());
     }
 
     public function testDisabledAuthenticationRunsSelectedEngineMiddlewareWithoutIdentity(): void
@@ -69,7 +74,30 @@ final class GraphqlEndpointMiddlewareTest extends TestCase
         $this->assertSame(2, $engine->calls);
     }
 
-    private function middleware(RecordingEngine $engine, bool $authenticated): GraphqlEndpointMiddleware
+    public function testClearsAuthenticationBridgeAfterRejectedRequest(): void
+    {
+        $authenticationService = new CakeAuthenticationService();
+        $middleware = $this->middleware(
+            new RecordingEngine($authenticationService),
+            authenticated: true,
+            authenticationService: $authenticationService,
+        );
+        $authenticationService->setIdentity(new \stdClass());
+
+        $this->expectException(UnauthorizedException::class);
+
+        try {
+            $middleware->process(new ServerRequest(), $this->terminalHandler());
+        } finally {
+            $this->assertNull($authenticationService->getIdentity());
+        }
+    }
+
+    private function middleware(
+        RecordingEngine $engine,
+        bool $authenticated,
+        ?CakeAuthenticationService $authenticationService = null,
+    ): GraphqlEndpointMiddleware
     {
         $config = GraphqlConfig::fromArray([
             'path' => '/api/graphql',
@@ -83,7 +111,7 @@ final class GraphqlEndpointMiddlewareTest extends TestCase
 
         return new GraphqlEndpointMiddleware($config, $context, new GraphqlEngineRegistry([
             'Graphqlite' => $engine,
-        ]));
+        ]), $authenticationService ?? new CakeAuthenticationService());
     }
 
     private function terminalHandler(): RequestHandlerInterface
@@ -101,6 +129,11 @@ final class RecordingEngine implements GraphqlEngineInterface
 {
     public int $calls = 0;
     public int $middlewareCreations = 0;
+    public ?object $seenIdentity = null;
+
+    public function __construct(public readonly ?CakeAuthenticationService $authenticationService = null)
+    {
+    }
 
     public function createMiddleware(GraphqlEngineContext $context): MiddlewareInterface
     {
@@ -114,6 +147,7 @@ final class RecordingEngine implements GraphqlEngineInterface
             public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
             {
                 $this->engine->calls++;
+                $this->engine->seenIdentity = $this->engine->authenticationService?->getIdentity();
 
                 return new Response(status: 211);
             }
