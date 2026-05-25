@@ -32,12 +32,7 @@ final readonly class GraphqliteEngine implements GraphqlEngineInterface
             $container = new BasicAutoWiringContainer($context->container());
             $schemaFactory = new SchemaFactory(Cache::pool($cacheName), $container);
             $schemaFactory->setFinder(new StaticClassFinder($classes));
-            if ($context->container()->has(CakeAuthenticationService::class)) {
-                $authenticationService = $context->container()->get(CakeAuthenticationService::class);
-                if ($authenticationService instanceof CakeAuthenticationService) {
-                    $schemaFactory->setAuthenticationService($authenticationService);
-                }
-            }
+            $this->configureAuthenticationService($schemaFactory, $context);
 
             foreach ($this->namespaces($classes) as $namespace) {
                 $schemaFactory->addNamespace($namespace);
@@ -65,6 +60,18 @@ final readonly class GraphqliteEngine implements GraphqlEngineInterface
                 'Unable to create GraphQLite middleware: ' . $e->getMessage(),
                 previous: $e,
             );
+        }
+    }
+
+    private function configureAuthenticationService(SchemaFactory $schemaFactory, GraphqlEngineContext $context): void
+    {
+        if (!$context->container()->has(CakeAuthenticationService::class)) {
+            return;
+        }
+
+        $authenticationService = $context->container()->get(CakeAuthenticationService::class);
+        if ($authenticationService instanceof CakeAuthenticationService) {
+            $schemaFactory->setAuthenticationService($authenticationService);
         }
     }
 
