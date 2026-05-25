@@ -105,7 +105,37 @@ CakeGraphQL uses explicit class registration. Add resolver classes to `queries` 
 
 GraphQLite provides field-level security attributes such as `#[Logged]`, `#[Right]`, and `#[Security]`.
 
-CakeGraphQL does not currently bridge CakePHP Authentication or Authorization into GraphQLite's `AuthenticationServiceInterface` or `AuthorizationServiceInterface`. These examples show GraphQLite syntax, but they require GraphQLite auth services to be wired before they will work in a CakePHP application.
+CakeGraphQL bridges CakePHP Authentication's request `identity` attribute into GraphQLite's `AuthenticationServiceInterface`. This makes `#[Logged]` and `#[InjectUser]` work with the user identity created by the host application's Cake Authentication middleware.
+
+This bridge does not use `AuthenticationComponent`; that component is controller-only. Resolver classes should use GraphQLite injection instead.
+
+Use `#[InjectUser]` to receive the current authenticated user in a resolver. If the parameter is nullable, anonymous requests receive `null`:
+
+```php
+use App\Model\Entity\User;
+use TheCodingMachine\GraphQLite\Annotations\InjectUser;
+use TheCodingMachine\GraphQLite\Annotations\Query;
+
+#[Query]
+public function me(#[InjectUser] ?User $user): ?User
+{
+    return $user;
+}
+```
+
+If the parameter is not nullable, GraphQLite requires a logged-in user:
+
+```php
+use App\Model\Entity\User;
+use TheCodingMachine\GraphQLite\Annotations\InjectUser;
+use TheCodingMachine\GraphQLite\Annotations\Query;
+
+#[Query]
+public function me(#[InjectUser] User $user): User
+{
+    return $user;
+}
+```
 
 `#[Logged]` requires a logged-in GraphQLite user:
 
@@ -120,6 +150,8 @@ public function me(): User
     return $this->fetchTable('Users')->getCurrentUser();
 }
 ```
+
+CakeGraphQL does not currently bridge CakePHP Authorization into GraphQLite's `AuthorizationServiceInterface`. The following examples show GraphQLite authorization syntax, but they require a separate authorization integration before they will work in a CakePHP application.
 
 `#[Right]` checks an authorization right:
 
@@ -149,4 +181,4 @@ public function auditLog(): array
 }
 ```
 
-Use CakeGraphQL's `authenticated` option for endpoint-level protection today. Use GraphQLite security attributes only after adding an integration that supplies GraphQLite authentication and authorization services.
+Use CakeGraphQL's `authenticated` option for endpoint-level protection. Use `#[Logged]` and `#[InjectUser]` for resolver-level authentication. Use GraphQLite authorization attributes only after adding an integration that supplies GraphQLite authorization services.
