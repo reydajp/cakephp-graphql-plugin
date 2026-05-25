@@ -109,8 +109,6 @@ CakeGraphQL bridges CakePHP Authentication's request `identity` attribute into G
 
 This bridge does not use `AuthenticationComponent`; that component is controller-only. Resolver classes should use GraphQLite injection instead.
 
-See [ADR-001](decisions/001-bridge-cake-authentication-to-graphqlite.md) for the bridge design rationale.
-
 Use `#[InjectUser]` to receive the current authenticated user in a resolver. If the parameter is nullable, anonymous requests receive `null`:
 
 ```php

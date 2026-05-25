@@ -146,7 +146,7 @@ The bridge reads Cake's request `identity` attribute. `AuthenticationComponent` 
 
 Field-level authorization is intentionally engine-specific. GraphQLite attributes such as `#[Right]` or `#[Security]` require GraphQLite authorization services; CakeGraphQL does not currently bridge Cake Authorization into those services.
 
-See [docs/graphqlite.md](docs/graphqlite.md#security-attributes) for examples and the current integration boundary. See [ADR-001](docs/decisions/001-bridge-cake-authentication-to-graphqlite.md) for the bridge design rationale.
+See [docs/graphqlite.md](docs/graphqlite.md#security-attributes) for examples and the current integration boundary.
 
 ## Commands
 
