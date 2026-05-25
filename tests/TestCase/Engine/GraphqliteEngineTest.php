@@ -11,6 +11,8 @@ use CakeGraphQL\Configuration\GraphqlConfig;
 use CakeGraphQL\Engine\GraphqlEngineContext;
 use CakeGraphQL\Engine\GraphqliteEngine;
 use CakeGraphQL\Exception\GraphqlConfigurationException;
+use CakeGraphQL\Security\CakeAuthenticationService;
+use CakeGraphQL\Test\Fixture\Graphql\AuthenticatedQuery;
 use CakeGraphQL\Test\Fixture\Graphql\TestQuery;
 use Laminas\Diactoros\Response;
 use PHPUnit\Framework\TestCase;
@@ -51,6 +53,38 @@ final class GraphqliteEngineTest extends TestCase
 
         $this->assertSame(200, $response->getStatusCode());
         $this->assertSame(['hello' => 'world'], $payload['data']);
+    }
+
+    public function testInjectsCurrentUserFromCakeAuthenticationBridge(): void
+    {
+        $user = new \stdClass();
+        $user->name = 'Ada';
+        $identity = new class ($user) {
+            public function __construct(private readonly object $user)
+            {
+            }
+
+            public function getOriginalData(): object
+            {
+                return $this->user;
+            }
+        };
+        $authenticationService = new CakeAuthenticationService();
+        $authenticationService->setIdentity($identity);
+        $container = new Container();
+        $container->addShared(CakeAuthenticationService::class, $authenticationService);
+        $middleware = (new GraphqliteEngine())->createMiddleware($this->context([
+            'queries' => [AuthenticatedQuery::class],
+            'types' => [],
+            'cache' => 'cake_graphql_test',
+            'debug' => false,
+        ], $container));
+
+        $response = $middleware->process($this->request('{ currentUserName }'), $this->terminalHandler());
+        $payload = json_decode((string)$response->getBody(), true);
+
+        $this->assertSame(200, $response->getStatusCode());
+        $this->assertSame(['currentUserName' => 'Ada'], $payload['data']);
     }
 
     public function testDoesNotScanUnlistedQueryClasses(): void
@@ -195,9 +229,9 @@ final class GraphqliteEngineTest extends TestCase
     /**
      * @param array<string, mixed> $engineConfig
      */
-    private function context(array $engineConfig): GraphqlEngineContext
+    private function context(array $engineConfig, ?Container $container = null): GraphqlEngineContext
     {
-        return new GraphqlEngineContext(new Container(), GraphqlConfig::fromArray([
+        return new GraphqlEngineContext($container ?? new Container(), GraphqlConfig::fromArray([
             'path' => '/api/graphql',
             'engine' => 'Graphqlite',
             'authenticated' => true,

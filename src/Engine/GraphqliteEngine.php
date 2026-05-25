@@ -5,6 +5,7 @@ namespace CakeGraphQL\Engine;
 
 use Cake\Cache\Cache;
 use CakeGraphQL\Exception\GraphqlConfigurationException;
+use CakeGraphQL\Security\CakeAuthenticationService;
 use GraphQL\Error\DebugFlag;
 use GraphQL\Validator\Rules\QueryDepth;
 use Psr\Http\Server\MiddlewareInterface;
@@ -31,6 +32,12 @@ final readonly class GraphqliteEngine implements GraphqlEngineInterface
             $container = new BasicAutoWiringContainer($context->container());
             $schemaFactory = new SchemaFactory(Cache::pool($cacheName), $container);
             $schemaFactory->setFinder(new StaticClassFinder($classes));
+            if ($context->container()->has(CakeAuthenticationService::class)) {
+                $authenticationService = $context->container()->get(CakeAuthenticationService::class);
+                if ($authenticationService instanceof CakeAuthenticationService) {
+                    $schemaFactory->setAuthenticationService($authenticationService);
+                }
+            }
 
             foreach ($this->namespaces($classes) as $namespace) {
                 $schemaFactory->addNamespace($namespace);
