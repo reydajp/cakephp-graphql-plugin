@@ -1,6 +1,6 @@
 {
-    "name": "cake-graphql/cake-graphql",
-    "description": "CakePHP 5 plugin for GraphQL endpoint wiring, engine selection, and GraphQLite integration.",
+    "name": "reydajp/cake-graphql",
+    "description": "GraphQL endpoint plugin for CakePHP 5 using GraphQLite and Webonyx GraphQL PHP.",
     "type": "cakephp-plugin",
     "license": "MIT",
     "authors": [

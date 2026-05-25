@@ -18,11 +18,8 @@ The plugin owns the HTTP endpoint and GraphQL engine wiring. The host applicatio
 
 ## Installation
 
-For local development, install this plugin as a path repository from the host CakePHP application:
-
 ```bash
-composer config repositories.cake-graphql path plugins/CakeGraphQL
-composer require cake-graphql/cake-graphql
+composer require reydajp/cake-graphql
 ```
 
 Load the plugin in the host application:
