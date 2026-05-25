@@ -77,6 +77,18 @@ final class GraphqlEndpointTest extends TestCase
         $this->assertSame(['optionalCurrentUserName' => null], $payload['data']);
     }
 
+    public function testLoggedResolverRejectsAnonymousRequestOnPublicEndpoint(): void
+    {
+        $middleware = $this->middleware(authenticated: false);
+
+        $response = $middleware->process($this->request('{ loggedMessage }'), $this->terminalHandler());
+        $payload = json_decode((string)$response->getBody(), true);
+
+        $this->assertSame(401, $response->getStatusCode());
+        $this->assertArrayHasKey('errors', $payload);
+        $this->assertSame('You need to be logged to access this field', $payload['errors'][0]['message']);
+    }
+
     private function middleware(bool $authenticated): GraphqlEndpointMiddleware
     {
         Configure::write('Graphql', [
