@@ -8,6 +8,14 @@
             "name": "reydajp"
         }
     ],
+    "keywords": [
+        "cakephp",
+        "cakephp5",
+        "graphql",
+        "graphqlite",
+        "webonyx",
+        "cakephp-plugin"
+    ],
     "require": {
         "php": ">=8.3",
         "cakephp/cakephp": "^5.0",

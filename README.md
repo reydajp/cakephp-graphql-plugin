@@ -4,7 +4,7 @@
 [![PHP](https://img.shields.io/badge/PHP-%3E%3D8.3-777BB4.svg)](https://www.php.net/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-# CakeGraphQL
+# CakeGraphQL - GraphQL plugin for CakePHP 5
 
 CakeGraphQL is a CakePHP 5 plugin for GraphQL endpoint routing, endpoint-level authentication, engine selection, and GraphQLite integration.
 
